@@ -1,0 +1,38 @@
+# PPuRI-AI Ultimate - Simple Docker Container
+FROM python:3.11-slim
+
+# 작업 디렉토리 설정
+WORKDIR /app
+
+# 시스템 패키지 업데이트
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python 의존성 설치
+RUN pip install --no-cache-dir \
+    fastapi==0.104.1 \
+    uvicorn[standard]==0.24.0 \
+    pydantic==2.5.0 \
+    python-multipart==0.0.6
+
+# 애플리케이션 파일 복사
+COPY simple_stable_server.py .
+COPY requirements.txt* ./
+
+# 추가 의존성 설치 (있는 경우)
+RUN if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; fi
+
+# 포트 노출
+EXPOSE 8002
+
+# 헬스체크 설정
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8002/api/health || exit 1
+
+# 환경 변수 설정
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+
+# 서버 실행
+CMD ["python", "simple_stable_server.py"]

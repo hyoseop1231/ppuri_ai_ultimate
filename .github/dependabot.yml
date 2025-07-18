@@ -1,0 +1,70 @@
+# 🛡️ Dependabot 설정 - 의존성 보안 업데이트
+
+version: 2
+updates:
+  # Python 의존성 모니터링
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    reviewers:
+      - "ppuri-ai-team"
+    assignees:
+      - "ppuri-ai-team"
+    labels:
+      - "dependencies"
+      - "security"
+      - "python"
+    commit-message:
+      prefix: "🔒 보안:"
+      include: "scope"
+    open-pull-requests-limit: 10
+    target-branch: "develop"
+    versioning-strategy: increase
+    
+  # GitHub Actions 워크플로우 모니터링
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    reviewers:
+      - "ppuri-ai-team"
+    assignees:
+      - "ppuri-ai-team"
+    labels:
+      - "dependencies"
+      - "ci"
+      - "github-actions"
+    commit-message:
+      prefix: "🔧 CI/CD:"
+      include: "scope"
+    open-pull-requests-limit: 5
+    target-branch: "develop"
+    
+  # Docker 베이스 이미지 모니터링
+  - package-ecosystem: "docker"
+    directory: "/docker"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    reviewers:
+      - "ppuri-ai-team"
+    assignees:
+      - "ppuri-ai-team"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "security"
+    commit-message:
+      prefix: "🐳 Docker:"
+      include: "scope"
+    open-pull-requests-limit: 5
+    target-branch: "develop"

@@ -1,0 +1,165 @@
+# PPuRI-AI Ultimate 설정 파일 (YAML)
+# 이 파일을 config.yaml로 복사하여 사용하세요
+
+# =============================================================================
+# 데이터베이스 설정
+# =============================================================================
+database:
+  type: "chromadb"
+  host: "localhost"
+  port: 8000
+  database: "ppuri_ai"
+  username: ""
+  password: ""
+  ssl: false
+  pool_size: 10
+  timeout: 30
+  persist_directory: "./vector_db_data"
+
+# =============================================================================
+# 임베딩 모델 설정
+# =============================================================================
+embedding:
+  model_name: "all-MiniLM-L6-v2"
+  dimension: 384
+  device: "cpu"  # 또는 "cuda"
+  batch_size: 32
+  normalize: true
+  cache_dir: "./models"
+
+# =============================================================================
+# RAG 시스템 설정
+# =============================================================================
+rag:
+  chunk_size: 1000
+  chunk_overlap: 200
+  max_results: 10
+  similarity_threshold: 0.7
+  enable_hybrid_search: true
+  enable_reranking: true
+  adaptive_sizing: true
+  use_semantic_chunking: true
+  embedding_model: "all-MiniLM-L6-v2"
+  device: "cpu"
+
+# =============================================================================
+# Ollama LLM 설정
+# =============================================================================
+ollama:
+  base_url: "http://localhost:11434"
+  model: "llama3.1:8b"
+  timeout: 120
+  temperature: 0.7
+  max_tokens: 2048
+  stream: true
+
+# =============================================================================
+# 웹 서버 설정
+# =============================================================================
+server:
+  host: "127.0.0.1"
+  port: 8000
+  debug: true
+  reload: true
+  workers: 1
+  cors_origins:
+    - "*"
+  max_upload_size_mb: 100
+  api_prefix: "/api"
+
+# =============================================================================
+# 로깅 설정
+# =============================================================================
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file_path: "./logs/ppuri_ai.log"
+  max_file_size_mb: 10
+  backup_count: 5
+  enable_console: true
+
+# =============================================================================
+# 한국어 처리 설정
+# =============================================================================
+korean:
+  normalize_text: true
+  extract_entities: true
+  confidence_threshold: 0.6
+  industry_terms_only: false
+  use_morphological_analysis: true
+
+# =============================================================================
+# 보안 설정
+# =============================================================================
+security:
+  secret_key: "your-super-secret-key-change-this-in-production"
+  access_token_expire_minutes: 30
+  refresh_token_expire_days: 7
+  algorithm: "HS256"
+  enable_cors: true
+  enable_api_key: false
+  api_key: ""
+
+# =============================================================================
+# 캐시 설정
+# =============================================================================
+cache:
+  redis_url: null  # "redis://localhost:6379/0"
+  ttl_seconds: 3600
+  max_size: 1000
+  enable_file_cache: true
+  cache_dir: "./cache"
+
+# =============================================================================
+# 뿌리산업 특화 설정
+# =============================================================================
+industry:
+  domains:
+    - "주조"
+    - "금형" 
+    - "소성가공"
+    - "용접"
+    - "표면처리"
+    - "열처리"
+  auto_detection: true
+  confidence_threshold: 0.8
+
+# =============================================================================
+# MCP 도구 생태계 설정
+# =============================================================================
+mcp:
+  enable_discovery: true
+  timeout_seconds: 30
+  tools_config: "./mcp_config.json"
+  auto_evolution: true
+
+# =============================================================================
+# 성능 및 모니터링 설정
+# =============================================================================
+performance:
+  preload_embedding_model: false
+  enable_external_access: true
+  max_concurrent_requests: 100
+  request_timeout_seconds: 120
+  enable_monitoring: true
+  enable_telemetry: false
+
+# =============================================================================
+# UI 설정 (KITECH 최적화)
+# =============================================================================
+ui:
+  enable_think_block: true
+  enable_reference_accordion: true
+  theme: "dark"
+  enable_websocket: true
+  streaming_buffer_size: 1024
+
+# =============================================================================
+# 개발 설정
+# =============================================================================
+development:
+  auto_reload: true
+  debug_mode: true
+  load_sample_data: false
+  enable_api_docs: true
+  enable_experimental_features: false
