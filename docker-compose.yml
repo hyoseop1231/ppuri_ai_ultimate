@@ -43,11 +43,14 @@ services:
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
       
-      # LLM 설정 (로컬 Ollama 사용)
+      # LLM 설정 (OpenRouter + 로컬 Ollama)
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - DEFAULT_LLM_PROVIDER=openrouter
       - OLLAMA_HOST=http://host.docker.internal:11434
       - OLLAMA_MODEL=qwen3:30b-a3b
       - VISION_MODEL=llava:13b
-      - EMBEDDING_MODEL=nomic-embed-text:latest
+      - EMBEDDING_MODEL=BAAI/bge-m3
       
       # 자동 최적화 설정 (AdalFlow)
       - ADALFLOW_ENABLED=true
@@ -82,9 +85,30 @@ services:
       timeout: 10s
       retries: 3
 
-  # 🐘 PostgreSQL - 메인 데이터베이스
+  # 🌐 Streamlit UI - NotebookLM 스타일 인터페이스
+  ppuri-ui:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.streamlit
+    container_name: ppuri-ui
+    depends_on:
+      - ppuri-ai
+    environment:
+      - PPURI_API_URL=http://ppuri-ai:8000
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+    ports:
+      - "8501:8501"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 🐘 PostgreSQL + pgvector - 메인 데이터베이스
   postgres:
-    image: postgres:15-alpine
+    image: pgvector/pgvector:pg16
     container_name: ppuri-postgres
     # 🔧 리소스 제한 (데이터베이스 최적화)
     deploy:

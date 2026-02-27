@@ -28,6 +28,13 @@ from core.knowledge_graph.graph_manager import GraphManager
 from core.rag_engine.rag_orchestrator import RAGOrchestrator
 from core.mcp_ecosystem.ecosystem_orchestrator import MCPEcosystemOrchestrator
 
+# NotebookLM-style Ultimate Components
+from core.llm import get_openrouter_client
+from core.embeddings import get_embedding_service
+from core.services import get_chat_service
+from core.connectors import get_search_orchestrator
+from core.database.connection import init_database, check_database_health
+
 
 async def main():
     """메인 실행 함수"""
@@ -86,13 +93,46 @@ async def main():
         
         # 3. 핵심 컴포넌트들 초기화
         logger.info("🧠 핵심 AI 컴포넌트들 초기화 중...")
-        
+
         # 더미 컴포넌트들 (실제 구현체가 준비될 때까지 사용)
         class DummyComponent:
             async def initialize(self): pass
             async def cleanup(self): pass
             async def health_check(self): return "healthy"
-        
+
+        # NotebookLM-style Ultimate Components 초기화
+        try:
+            logger.info("🔗 OpenRouter LLM 클라이언트 초기화...")
+            llm_client = await get_openrouter_client()
+            logger.info("✅ OpenRouter LLM 클라이언트 준비 완료")
+
+            logger.info("🔤 BGE-M3 임베딩 서비스 초기화...")
+            embedding_service = await get_embedding_service()
+            logger.info("✅ BGE-M3 임베딩 서비스 준비 완료")
+
+            logger.info("🔍 외부 검색 오케스트레이터 초기화...")
+            search_orchestrator = await get_search_orchestrator()
+            logger.info("✅ 외부 검색 오케스트레이터 준비 완료")
+
+            logger.info("💬 NotebookLM 스타일 채팅 서비스 초기화...")
+            chat_service = await get_chat_service()
+            logger.info("✅ 채팅 서비스 준비 완료")
+
+            # 데이터베이스 초기화 (선택적)
+            db_enabled = os.getenv('DB_ENABLED', 'false').lower() == 'true'
+            if db_enabled:
+                logger.info("🗄️ PostgreSQL + pgvector 데이터베이스 초기화...")
+                await init_database()
+                db_health = await check_database_health()
+                if db_health.get("status") == "healthy":
+                    logger.info(f"✅ 데이터베이스 연결 완료 (pgvector: {db_health.get('pgvector_enabled')})")
+                else:
+                    logger.warning(f"⚠️ 데이터베이스 상태: {db_health}")
+
+        except Exception as e:
+            logger.warning(f"⚠️ Ultimate 컴포넌트 초기화 일부 실패: {e}")
+            logger.warning("⚠️ 기존 시스템 컴포넌트로 계속 진행...")
+
         # 실제 구현체들 초기화
         try:
             # 한국어 최적화기
@@ -189,20 +229,22 @@ if __name__ == "__main__":
     
     # 배너 출력
     print("""
-    🏭 PPuRI-AI Ultimate v1.0.0
-    ════════════════════════════════════
-    뿌리산업 특화 차세대 AI 시스템
-    
+    🏭 PPuRI-AI Ultimate v2.0.0
+    ════════════════════════════════════════════════
+    뿌리산업 특화 NotebookLM-스타일 AI 시스템
+
     📋 시스템 구성:
-    ├── 🧠 AdalFlow Engine (자동 프롬프트 최적화)
-    ├── 🔍 RAG System (ChromaDB 하이브리드 검색)
-    ├── 🕸️ Knowledge Graph (Neo4j 실시간 구축)
-    ├── 🔧 MCP Ecosystem (자동 진화 도구)
-    └── 🌐 Real-time UI (WebSocket 3채널)
-    
+    ├── 🤖 OpenRouter LLM (Gemini 3 Pro, DeepSeek R1, Claude)
+    ├── 🔤 BGE-M3 Embeddings (한국어 최적화)
+    ├── 🔍 LightRAG Engine (지식그래프 + 하이브리드 검색)
+    ├── 🌐 외부 검색 통합 (Tavily, Semantic Scholar, KIPRIS)
+    ├── 🎙️ Audio Overview (TTS 팟캐스트 생성)
+    ├── 📊 pgvector 벡터 DB (PostgreSQL)
+    └── 💬 Source Grounding (인라인 인용 [1][2])
+
     🏭 뿌리산업 6개 도메인:
     주조 | 금형 | 소성가공 | 용접 | 표면처리 | 열처리
-    ════════════════════════════════════
+    ════════════════════════════════════════════════
     """)
     
     try:

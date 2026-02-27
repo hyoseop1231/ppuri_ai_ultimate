@@ -324,7 +324,7 @@ async def delete_message(
         )
 
 
-# 헬퍼 함수들 (실제 구현 필요)
+# ChatService 통합 헬퍼 함수들
 async def process_chat_message(
     session_id: str,
     message: str,
@@ -333,19 +333,78 @@ async def process_chat_message(
     context: Optional[Dict[str, Any]],
     user_id: str
 ) -> Dict[str, Any]:
-    """채팅 메시지 처리"""
-    # 실제 ui_orchestrator 연동 로직 구현 필요
-    await asyncio.sleep(0.1)  # 시뮬레이션
-    
-    return {
-        "response": f"처리된 응답: {message}",
-        "think_blocks": [],
-        "sources": [],
-        "suggestions": ["관련 질문 1", "관련 질문 2"],
-        "processing_time": 0.5,
-        "model_used": "gpt-3.5-turbo",
-        "confidence": 0.95
-    }
+    """채팅 메시지 처리 - ChatService 통합"""
+    try:
+        from core.services import get_chat_service, SearchMode
+
+        chat_service = await get_chat_service()
+
+        # 컨텍스트에서 검색 모드 추출
+        search_mode = SearchMode.WEB_ENABLED
+        industry_filter = None
+
+        if context:
+            mode_str = context.get("search_mode", "web_enabled")
+            if mode_str == "documents_only":
+                search_mode = SearchMode.DOCUMENTS_ONLY
+            elif mode_str == "full_search":
+                search_mode = SearchMode.FULL_SEARCH
+
+            industry_filter = context.get("industry")
+
+        # 채팅 서비스로 응답 생성
+        response = await chat_service.chat(
+            query=message,
+            search_mode=search_mode,
+            industry_filter=industry_filter,
+            session_id=session_id
+        )
+
+        # 인용 정보를 소스로 변환
+        sources = []
+        for citation in response.citations:
+            sources.append({
+                "id": citation.id,
+                "title": citation.title,
+                "snippet": citation.content_snippet,
+                "type": citation.source_type,
+                "url": citation.url,
+                "page": citation.page_number,
+                "confidence": citation.confidence
+            })
+
+        # 추론 상세 정보
+        think_blocks = []
+        if response.reasoning_details:
+            for detail in response.reasoning_details:
+                think_blocks.append({
+                    "type": detail.get("type", "thinking"),
+                    "content": detail.get("content", "")
+                })
+
+        return {
+            "response": response.answer,
+            "think_blocks": think_blocks,
+            "sources": sources,
+            "suggestions": await generate_input_suggestions(session_id, message, 3, user_id),
+            "processing_time": (response.search_time_ms + response.generation_time_ms) / 1000,
+            "model_used": response.model_used,
+            "confidence": 0.95,
+            "citations_footnote": chat_service.get_citations_footnotes(response.citations)
+        }
+
+    except Exception as e:
+        logger.error(f"ChatService processing failed: {e}")
+        # 폴백 응답
+        return {
+            "response": f"죄송합니다, 일시적인 오류가 발생했습니다: {str(e)}",
+            "think_blocks": [],
+            "sources": [],
+            "suggestions": [],
+            "processing_time": 0,
+            "model_used": "fallback",
+            "confidence": 0.0
+        }
 
 
 async def get_session_message_history(
@@ -417,20 +476,37 @@ async def stream_chat_response_generator(
     message: str,
     user_id: str
 ):
-    """스트리밍 응답 생성기"""
-    # 실제 스트리밍 응답 생성 로직 구현 필요
+    """스트리밍 응답 생성기 - ChatService 통합"""
     import json
-    
-    response_chunks = [
-        "안녕하세요! ",
-        "PPuRI-AI ",
-        "Ultimate입니다. ",
-        "무엇을 도와드릴까요?"
-    ]
-    
-    for chunk in response_chunks:
-        yield json.dumps({"chunk": chunk, "type": "text"})
-        await asyncio.sleep(0.1)
+
+    try:
+        from core.services import get_chat_service, SearchMode
+
+        chat_service = await get_chat_service()
+
+        async for chunk in chat_service.chat_stream(
+            query=message,
+            search_mode=SearchMode.WEB_ENABLED
+        ):
+            # 인용 메타데이터 처리
+            if chunk.startswith("[CITATIONS_START]"):
+                citations_json = chunk.replace("[CITATIONS_START]", "").replace("[CITATIONS_END]", "")
+                yield json.dumps({
+                    "type": "citations",
+                    "data": json.loads(citations_json)
+                })
+            else:
+                yield json.dumps({
+                    "type": "text",
+                    "chunk": chunk
+                })
+
+    except Exception as e:
+        logger.error(f"Streaming response failed: {e}")
+        yield json.dumps({
+            "type": "error",
+            "message": str(e)
+        })
 
 
 async def delete_chat_message(

@@ -63,11 +63,16 @@ pyyaml>=6.0.1                    # YAML 처리
 tenacity>=8.2.0                  # 재시도 로직
 cachetools>=5.3.0                # 캐싱 유틸리티
 
-# 📈 데이터 분석 & 시각화  
+# 📈 데이터 분석 & 시각화
 pandas>=2.1.0                    # 데이터 처리
 numpy>=1.24.0                    # 수치 연산
 plotly>=5.17.0                   # 인터랙티브 시각화
 networkx>=3.2                    # 그래프 분석
+
+# 🌐 Streamlit UI (NotebookLM 스타일)
+streamlit>=1.30.0                # 웹 UI 프레임워크
+streamlit-extras>=0.3.0          # Streamlit 확장
+streamlit-chat>=0.1.1            # 채팅 UI 컴포넌트
 
 # 🔐 보안 & 인증
 python-jose[cryptography]>=3.3.0 # JWT 토큰
@@ -85,3 +90,48 @@ agno>=0.1.0                      # Agno 멀티 에이전트 프레임워크
 # 🌏 국제화 & 한국어 처리
 konlpy>=0.6.0                    # 한국어 형태소 분석 (선택적)
 kiwisolver>=1.4.5                # 한국어 처리 지원
+
+# 🎙️ Audio Overview (NotebookLM 스타일)
+edge-tts>=6.1.0                  # Microsoft Edge TTS (무료, 고품질 한국어)
+pydub>=0.25.1                    # 오디오 처리 및 병합
+ffmpeg-python>=0.2.0             # FFmpeg Python 래퍼
+
+# 🔍 웹 & 학술 검색 (하이브리드 검색)
+semanticscholar>=0.7.0           # Semantic Scholar API (학술 논문)
+arxiv>=2.1.0                     # arXiv API (프리프린트)
+
+# 📤 구조화된 출력 & 내보내기
+weasyprint>=60.0                 # PDF 생성
+openpyxl>=3.1.0                  # Excel 내보내기
+
+# 🔗 OpenRouter & Multi-LLM
+litellm>=1.20.0                  # Multi-LLM 통합 (OpenRouter, Ollama 등)
+
+# 🕸️ LightRAG & GraphRAG (최신 RAG 기술)
+# lightrag>=0.1.0                # LightRAG (직접 구현 또는 PyPI)
+
+# 🔎 외부 검색 API
+tavily-python>=0.3.0             # Tavily AI 검색 (SurfSense 추천)
+duckduckgo-search>=4.0.0         # DuckDuckGo 검색 (무료)
+
+# 🎵 고급 TTS (팟캐스트 생성)
+# melotts>=0.1.0                 # MeloTTS (MyShell.ai) - pip install git+
+kokoro>=0.1.0                    # Kokoro TTS (경량)
+
+# 📊 Reranking & 검색 품질
+cohere>=4.0.0                    # Cohere Reranker
+flashrank>=0.2.0                 # FlashRank (로컬 Reranker)
+
+# 🧮 벡터 DB 확장
+pgvector>=0.2.0                  # PostgreSQL 벡터 확장
+
+# 📝 문서 파싱 (멀티모달)
+docling>=0.1.0                   # IBM Docling 문서 파싱
+unstructured>=0.11.0             # Unstructured.io 문서 처리
+python-magic>=0.4.27             # 파일 타입 감지
+
+# 🔄 청킹 최적화
+chonkie>=0.1.0                   # 고급 청킹 라이브러리 (SurfSense 사용)
+
+# 🌐 SearxNG (셀프호스팅 검색)
+# searxng-client                 # SearxNG 클라이언트 (선택적)
